@@ -16,7 +16,8 @@ public class AppContext implements Setup{
 	Timer clearLogTimer;
 	@Override
 	public void destroy(NutConfig arg0) {
-		
+		pingTimer.cancel();
+		clearLogTimer.cancel();
 	}
 
 	@Override

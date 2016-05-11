@@ -82,9 +82,9 @@ public class PingService {
 				ipAddress.setStatus(true);
 			
 			//日志处理，通过前后状态对比判断中断/恢复
-			if((status!=(boolean)ipAddress.getStatus())&&(status))
+			if((status!=ipAddress.getStatus())&&status)
 				ipAddress.setLog(ipAddress.getLog()+"|    中断时间："+Times.sDT(new Date()));
-			else if((status!=(boolean)ipAddress.getStatus())&&(!status))
+			else if((status!=ipAddress.getStatus())&&!status)
 				ipAddress.setLog(ipAddress.getLog()+"|    恢复时间："+Times.sDT(new Date()));
 			
 			dao.update(ipAddress);
