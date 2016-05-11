@@ -40,13 +40,13 @@ public class PingService {
 		return list;
 	}
 	
+	//日志太长的话清理一下，取后面两条就好了
 	public void clearLog() {
 		List<IpAddress> list =  dao.query(IpAddress.class, Cnd.where(null));
-		String log;
 		for(IpAddress ipAddress: list){
-			log = ipAddress.getLog();
-			if(log.split("|").length>=4)
-				ipAddress.setLog(log.substring(log.lastIndexOf("|")));
+			String[] logs = ipAddress.getLog().split("|");
+			if(logs.length>=4)
+				ipAddress.setLog(logs[2]+logs[3]);
 			dao.update(ipAddress);
 		}
 	}

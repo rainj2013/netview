@@ -1,17 +1,16 @@
 package cn.edu.gdut.bean;
 
 import org.nutz.dao.entity.annotation.Column;
-import org.nutz.dao.entity.annotation.PK;
+import org.nutz.dao.entity.annotation.Name;
 import org.nutz.dao.entity.annotation.Table;
 
 @Table(value = "ipaddress")
-@PK( {"address", "host"} )
 public class IpAddress {
 	@Column
 	private Integer count;
 	@Column
 	private String address;
-	@Column
+	@Name
 	private String host;
 	@Column
 	private Boolean status;
