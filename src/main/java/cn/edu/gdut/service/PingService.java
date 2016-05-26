@@ -10,18 +10,24 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.mail.HtmlEmail;
 import org.nutz.dao.Cnd;
+import org.nutz.dao.entity.Record;
 import org.nutz.dao.impl.NutDao;
+import org.nutz.ioc.Ioc;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Times;
 
 import cn.edu.gdut.bean.IpAddress;
+import cn.edu.gdut.util.DateUtil;
 
 @IocBean
 public class PingService {
 	@Inject
 	private NutDao dao;
+	@Inject
+	private Ioc ioc;
 	
 	public List<IpAddress> view(){
 		List<IpAddress> list =  dao.query(IpAddress.class, Cnd.where(null));
@@ -68,25 +74,43 @@ public class PingService {
 			//获取初始状态
 			boolean status = ipAddress.getStatus();
 		
-			//统计ping失败次数,如果成功就重置ping失败次数
-			if(ipAddress.getOk())
+			//统计ping失败次数,如果成功就重置状态
+			if(ipAddress.getOk()){
 				ipAddress.setCount(0);
+				ipAddress.setWarn(false);
+			}
+				
 			//失败则增加ping失败次数
 			else
 				ipAddress.setCount(ipAddress.getCount()+1);
 			
 			//如果超过三次ping失败，就将状态设置为false
-			if(ipAddress.getCount()>=3)
+			if(ipAddress.getCount()>=3){
+				ipAddress.setWarn(true);
 				ipAddress.setStatus(false);
+			}
 			else
 				ipAddress.setStatus(true);
 			
 			//日志处理，通过前后状态对比判断中断/恢复
-			if((status!=ipAddress.getStatus())&&status)
-				ipAddress.setLog(ipAddress.getLog()+"|    中断时间："+Times.sDT(new Date()));
-			else if((status!=ipAddress.getStatus())&&!status)
+			if((status!=ipAddress.getStatus())&&status){
+				Date date = new Date();
+				ipAddress.setLog(ipAddress.getLog()+"|    中断时间："+Times.sDT(date));
+				ipAddress.setInterruptTime(date);
+			}
+			else if((status!=ipAddress.getStatus())&&!status){
 				ipAddress.setLog(ipAddress.getLog()+"|    恢复时间："+Times.sDT(new Date()));
+				ipAddress.setWarn(false);
+			}
 			
+			//邮件
+			if(ipAddress.isWarn()){
+				List<Record> emails = dao.query("emails",null);
+				double minutes = DateUtil.minDiff(new Date(), ipAddress.getInterruptTime());
+				if(minutes>=30){
+						sendMail(emails, ipAddress);
+				}
+			}
 			dao.update(ipAddress);
 		}
 		
@@ -108,6 +132,20 @@ public class PingService {
 		
 	}
 
+	public void sendMail(List<Record> emails,IpAddress ipAddress) {
+		try {
+			HtmlEmail sendEmail = ioc.get(HtmlEmail.class);
+			sendEmail.setSubject("交换机故障报警");
+			sendEmail.setMsg("以下机器较长时间不通 : " + ipAddress);
+			for(Record record : emails){
+				sendEmail.addTo(record.getString("email"));
+			}
+			sendEmail.send();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	class PingTask implements Runnable {
 		int timeOut = 1500;
 		

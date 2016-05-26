@@ -1,5 +1,7 @@
 package cn.edu.gdut.bean;
 
+import java.util.Date;
+
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
 import org.nutz.dao.entity.annotation.Table;
@@ -16,8 +18,24 @@ public class IpAddress {
 	private Boolean status;
 	@Column
 	private String log;
+	@Column
+	private boolean warn;
+	@Column
+	private Date interruptTime;
 	private Boolean Ok;
 	
+	public Date getInterruptTime() {
+		return interruptTime;
+	}
+	public void setInterruptTime(Date interruptTime) {
+		this.interruptTime = interruptTime;
+	}
+	public boolean isWarn() {
+		return warn;
+	}
+	public void setWarn(boolean warn) {
+		this.warn = warn;
+	}
 	public IpAddress() {
 		super();
 	}
