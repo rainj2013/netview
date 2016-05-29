@@ -9,8 +9,11 @@ import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.mvc.annotation.AdaptBy;
 import org.nutz.mvc.annotation.At;
+import org.nutz.mvc.annotation.By;
+import org.nutz.mvc.annotation.Filters;
 import org.nutz.mvc.annotation.Ok;
 import org.nutz.mvc.annotation.Param;
+import org.nutz.mvc.filter.CheckSession;
 import org.nutz.mvc.upload.TempFile;
 import org.nutz.mvc.upload.UploadAdaptor;
 
@@ -20,6 +23,7 @@ import cn.edu.gdut.util.XlsUtil;
 import jxl.read.biff.BiffException;
 
 @IocBean
+@Filters(@By(type=CheckSession.class , args={"login","/login.jsp"}))
 public class UploadAction {
 	
 	@Inject

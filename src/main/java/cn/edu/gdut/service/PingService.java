@@ -3,6 +3,7 @@ package cn.edu.gdut.service;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,8 +27,10 @@ import cn.edu.gdut.util.DateUtil;
 public class PingService {
 	@Inject
 	private NutDao dao;
-	@Inject
-	private Ioc ioc;
+	@Inject("refer:$ioc")
+	protected Ioc ioc;
+	
+	List<IpAddress> mailIps = new ArrayList<>();
 	
 	public List<IpAddress> view(){
 		List<IpAddress> list =  dao.query(IpAddress.class, Cnd.where(null));
@@ -86,7 +89,6 @@ public class PingService {
 			
 			//如果超过三次ping失败，就将状态设置为false
 			if(ipAddress.getCount()>=3){
-				ipAddress.setWarn(true);
 				ipAddress.setStatus(false);
 			}
 			else
@@ -97,20 +99,28 @@ public class PingService {
 				Date date = new Date();
 				ipAddress.setLog(ipAddress.getLog()+"|    中断时间："+Times.sDT(date));
 				ipAddress.setInterruptTime(date);
+				ipAddress.setWarn(true);
 			}
 			else if((status!=ipAddress.getStatus())&&!status){
 				ipAddress.setLog(ipAddress.getLog()+"|    恢复时间："+Times.sDT(new Date()));
 				ipAddress.setWarn(false);
 			}
 			
-			//邮件
+			//添加到邮件列表
 			if(ipAddress.isWarn()){
-				List<Record> emails = dao.query("emails",null);
 				double minutes = DateUtil.minDiff(new Date(), ipAddress.getInterruptTime());
-				if(minutes>=30){
-						sendMail(emails, ipAddress);
+				System.out.println(minutes);
+				if(minutes>=1){
+					mailIps.add(ipAddress);
+					ipAddress.setWarn(false);//发完就设置一下警告状态，下次不发了
 				}
 			}
+			//发送邮件
+			if(mailIps.size()!=0){
+				sendMail(mailIps);
+				mailIps.clear();
+			}
+			
 			dao.update(ipAddress);
 		}
 		
@@ -132,14 +142,36 @@ public class PingService {
 		
 	}
 
+	public void sendMail(List<IpAddress> ips) {
+		List<Record> emails = dao.query("emails",null);
+		if(emails==null||emails.size()==0)
+			return;
+		try {
+			HtmlEmail sendEmail = ioc.get(HtmlEmail.class);
+			sendEmail.setSubject("交换机故障报警");
+			String msg = "";
+			for(IpAddress ip : ips){
+				msg+=ip.getAddress()+" IP:" +ip.getHost()+"    <br>";
+			}
+			sendEmail.setMsg(msg);
+			for(Record record : emails){
+				sendEmail.addTo(record.getString("email"));
+			}
+			sendEmail.send();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void sendMail(List<Record> emails,IpAddress ipAddress) {
 		try {
 			HtmlEmail sendEmail = ioc.get(HtmlEmail.class);
 			sendEmail.setSubject("交换机故障报警");
-			sendEmail.setMsg("以下机器较长时间不通 : " + ipAddress);
+			sendEmail.setMsg(ipAddress.getAddress()+" IP:" +ipAddress.getHost());
 			for(Record record : emails){
 				sendEmail.addTo(record.getString("email"));
 			}
+			
 			sendEmail.send();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -167,6 +199,18 @@ public class PingService {
 			}
 			ipAddress.setOk(ok);
 		}
+	}
+
+	public void init() {
+		List<IpAddress> list = dao.query(IpAddress.class,null);
+		for(IpAddress ip: list){
+			ip.setCount(0);
+			ip.setLog("");
+			ip.setStatus(true);
+			ip.setWarn(false);
+			dao.update(ip);
+		}
+		
 	}
 	
 }
