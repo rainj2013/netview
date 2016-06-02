@@ -149,11 +149,12 @@ public class PingService {
 		try {
 			HtmlEmail sendEmail = ioc.get(HtmlEmail.class);
 			sendEmail.setSubject("交换机故障报警");
-			String msg = "";
+			String msg = "以下交换机长时间不通：<br>";
 			for(IpAddress ip : ips){
 				msg+=ip.getAddress()+" IP:" +ip.getHost()+"    <br>";
 			}
 			sendEmail.setMsg(msg);
+			sendEmail.setCharset("UTF-8");
 			for(Record record : emails){
 				sendEmail.addTo(record.getString("email"));
 			}
@@ -163,13 +164,14 @@ public class PingService {
 		}
 	}
 	
-	public void sendMail(List<Record> emails,IpAddress ipAddress) {
+	public void sendMail(List<String> emails,IpAddress ipAddress) {
 		try {
 			HtmlEmail sendEmail = ioc.get(HtmlEmail.class);
 			sendEmail.setSubject("交换机故障报警");
-			sendEmail.setMsg(ipAddress.getAddress()+" IP:" +ipAddress.getHost());
-			for(Record record : emails){
-				sendEmail.addTo(record.getString("email"));
+			sendEmail.setMsg("故障交换机"+ipAddress.getAddress()+" IP:" +ipAddress.getHost());
+			sendEmail.setCharset("UTF-8");
+			for(String email : emails){
+				sendEmail.addTo(email);
 			}
 			
 			sendEmail.send();
