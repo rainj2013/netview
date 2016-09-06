@@ -14,20 +14,20 @@ import cn.edu.gdut.bean.IpAddress;
 import cn.edu.gdut.service.PingService;
 
 @IocBean
-@Filters(@By(type=CheckSession.class , args={"login","/login.jsp"}))
+@Filters(@By(type = CheckSession.class, args = {"login", "/login.jsp"}))
 public class PingAction {
 
-	@Inject
-	private PingService pingService;
-	
-	@At
-	@Ok("jsp:ping")
-	public List<IpAddress> view(){
-		return pingService.view();
-	}
-	
-	@At
-	public void init(){
-		pingService.init();
-	}
+    @Inject
+    private PingService pingService;
+
+    @At
+    @Ok("jsp:ping")
+    public List<IpAddress> view() {
+        return pingService.view();
+    }
+
+    @At
+    public void init() {
+        pingService.init();
+    }
 }

@@ -15,23 +15,24 @@ import cn.edu.gdut.service.ManagerService;
 
 @IocBean
 public class LoginAction {
-	
-	@Inject
-	private ManagerService managerService;
-	
-	@At
-	@POST
-	@Ok("json")
-	public Object login(@Param("password") String password,HttpSession session){
-		if(Lang.md5(password).equals(managerService.getPassword())){
-			session.setAttribute("login", true);
-			return true;
-		}else
-			return false;
-	}
-	
-	@At
-	@GET
-	@Ok("jsp:/login.jsp")
-	public void login(){}
+
+    @Inject
+    private ManagerService managerService;
+
+    @At
+    @POST
+    @Ok("json")
+    public Object login(@Param("password") String password, HttpSession session) {
+        if (Lang.md5(password).equals(managerService.getPassword())) {
+            session.setAttribute("login", true);
+            return true;
+        } else
+            return false;
+    }
+
+    @At
+    @GET
+    @Ok("jsp:/login.jsp")
+    public void login() {
+    }
 }

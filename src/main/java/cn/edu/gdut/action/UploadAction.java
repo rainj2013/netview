@@ -23,29 +23,29 @@ import cn.edu.gdut.util.XlsUtil;
 import jxl.read.biff.BiffException;
 
 @IocBean
-@Filters(@By(type=CheckSession.class , args={"login","/login.jsp"}))
+@Filters(@By(type = CheckSession.class, args = {"login", "/login.jsp"}))
 public class UploadAction {
-	
-	@Inject
-	private IpService ipService;
-	
-	@At("upload")
-	@AdaptBy(type = UploadAdaptor.class, args = { "ioc:myUpload" })
-	@Ok(">>:/view")
-	public void upload(@Param("xls") TempFile tf) throws ServletException {
-		try {
-			List<String[]> list = XlsUtil.readExcel(tf.getInputStream());
-			for(String[] strs : list){
-				IpAddress ipAddress = new IpAddress(strs[0], strs[1]);
-				ipAddress.setCount(0);
-				ipAddress.setLog("");
-				ipAddress.setStatus(true);
-				ipService.add(ipAddress);
-			}
-			
-		} catch (IOException | BiffException e) {
-			e.printStackTrace();
-		}
-	
-	}
+
+    @Inject
+    private IpService ipService;
+
+    @At("upload")
+    @AdaptBy(type = UploadAdaptor.class, args = {"ioc:myUpload"})
+    @Ok(">>:/view")
+    public void upload(@Param("xls") TempFile tf) throws ServletException {
+        try {
+            List<String[]> list = XlsUtil.readExcel(tf.getInputStream());
+            for (String[] strs : list) {
+                IpAddress ipAddress = new IpAddress(strs[0], strs[1]);
+                ipAddress.setCount(0);
+                ipAddress.setLog("");
+                ipAddress.setStatus(true);
+                ipService.add(ipAddress);
+            }
+
+        } catch (IOException | BiffException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
