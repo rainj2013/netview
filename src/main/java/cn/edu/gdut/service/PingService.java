@@ -49,7 +49,7 @@ public class PingService {
         for (IpAddress ipAddress : list) {
             String[] logs = ipAddress.getLog().split("[|]");
             if (logs.length >= 4)
-                ipAddress.setLog(logs[2] + logs[3]);
+                ipAddress.setLog(logs[logs.length-2] + logs[logs.length-1]);
             dao.update(ipAddress);
         }
     }
