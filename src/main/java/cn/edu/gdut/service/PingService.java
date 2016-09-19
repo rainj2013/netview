@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import cn.edu.gdut.util.PingUtil;
 import org.apache.commons.mail.HtmlEmail;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.entity.Record;
@@ -143,13 +144,8 @@ public class PingService {
         public void run() {
             String host = ipAddress.getHost();
             boolean ok = false;
-            try {
-                ok = InetAddress.getByName(host.trim()).isReachable(timeOut);
-            } catch (UnknownHostException e) {
-                System.out.println("地址：" + host + "错误！");
-            } catch (IOException e) {
-                System.out.println("地址：" + host + "连接失败！");
-            }
+            //ok = InetAddress.getByName(host.trim()).isReachable(timeOut);
+            ok = PingUtil.ping(host.trim(),2,timeOut);
             ipAddress.setOk(ok);
         }
     }
