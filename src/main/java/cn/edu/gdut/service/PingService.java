@@ -144,8 +144,15 @@ public class PingService {
         public void run() {
             String host = ipAddress.getHost();
             boolean ok = false;
-            //ok = InetAddress.getByName(host.trim()).isReachable(timeOut);
-            ok = PingUtil.ping(host.trim(),2,timeOut);
+            try {
+                ok = InetAddress.getByName(host.trim()).isReachable(timeOut);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //如果上面这种ping不成功就尝试直接调用windows下的cmd
+            if(!ok){
+                ok = PingUtil.ping(host.trim(),2,timeOut);
+            }
             ipAddress.setOk(ok);
         }
     }
