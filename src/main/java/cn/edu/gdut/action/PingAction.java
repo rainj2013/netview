@@ -15,6 +15,7 @@ import cn.edu.gdut.service.PingService;
 
 @IocBean
 @Filters(@By(type = CheckSession.class, args = {"login", "/login.jsp"}))
+@At("/ping")
 public class PingAction {
 
     @Inject
@@ -29,5 +30,10 @@ public class PingAction {
     @At
     public void init() {
         pingService.init();
+    }
+
+    @At("/switch")
+    public void pingSwitch(){
+        pingService.setPingSwitch(!pingService.isPingSwitch());
     }
 }

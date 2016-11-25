@@ -2,7 +2,6 @@ package cn.edu.gdut.service;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,19 +26,26 @@ public class PingService {
     @Inject("refer:$ioc")
     protected Ioc ioc;
 
+    private static boolean pingSwitch = false;
+
+    public static void setPingSwitch(boolean pingSwitch) {
+        PingService.pingSwitch = pingSwitch;
+    }
+
+    public static boolean isPingSwitch() {
+        return pingSwitch;
+    }
+
     List<IpAddress> mailIps = new ArrayList<>();
 
     public List<IpAddress> view() {
         List<IpAddress> list = dao.query(IpAddress.class, Cnd.where(null));
-        Collections.sort(list, new Comparator<IpAddress>() {
-            @Override
-            public int compare(IpAddress o1, IpAddress o2) {
-                if (o1.getStatus() == false && o2.getStatus())
-                    return -1;
-                else if (o1.getStatus() && o2.getStatus() == false)
-                    return 1;
-                return 0;
-            }
+        Collections.sort(list, (o1, o2) -> {
+            if (o1.getStatus() == false && o2.getStatus())
+                return -1;
+            else if (o1.getStatus() && o2.getStatus() == false)
+                return 1;
+            return 0;
         });
         return list;
     }
@@ -106,7 +112,7 @@ public class PingService {
                 }
             }
             //发送邮件
-            if (mailIps.size() != 0) {
+            if (pingSwitch && mailIps.size() != 0) {
                 sendMail(mailIps);
                 mailIps.clear();
             }

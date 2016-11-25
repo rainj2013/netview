@@ -19,7 +19,7 @@
             cache: false,
             success: function (result) {
                 if (result) {
-                    window.location.href = "view";
+                    window.location.href = "ping/view";
                 } else {
                     alert("密码错误！");
                 }
