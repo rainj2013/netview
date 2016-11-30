@@ -20,13 +20,13 @@ public class IpAction {
     private IpService ipService;
 
     @At
-    @Ok(">>:/view")
+    @Ok(">>:/ping/view")
     public void delete(@Param("host") String host) {
         ipService.delete(ipService.find(host));
     }
 
     @At
-    @Ok(">>:/view")
+    @Ok(">>:/ping/view")
     public void add(@Param("address") String address, @Param("host") String host) {
         IpAddress ipAddress = new IpAddress(address, host);
         ipAddress.setCount(0);
