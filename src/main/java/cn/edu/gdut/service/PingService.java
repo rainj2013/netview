@@ -26,7 +26,7 @@ public class PingService {
     @Inject("refer:$ioc")
     protected Ioc ioc;
 
-    private static boolean pingSwitch = false;
+    private static boolean pingSwitch = true;
 
     public static void setPingSwitch(boolean pingSwitch) {
         PingService.pingSwitch = pingSwitch;
